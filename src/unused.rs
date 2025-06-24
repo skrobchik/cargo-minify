@@ -22,6 +22,11 @@ pub fn get_unused<'a>(
     let mut command = Command::new("cargo");
 
     command.args(["check", "--all-targets", "--quiet", "--message-format", "json"]);
+    if let Some(manifest_path) = manifest_path {
+        command.args([
+            "--manifest-path", manifest_path.to_str().expect("manifest_path should be convertable to str")
+        ]);
+    }
 
     match crate_resolution {
         CrateResolutionOptions::Root => {}

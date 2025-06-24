@@ -223,12 +223,18 @@ fn process_files<Iter: IntoIterator<Item = UnusedDiagnostic>>(
 /// Process a list of UnusedDiagnostics into an iterator of filenames+proposed contents
 pub fn process_diagnostics(
     diagnostics: impl IntoIterator<Item = UnusedDiagnostic>,
+    manifest_path: Option<&PathBuf>,
 ) -> impl Iterator<Item = Change> {
     process_files(
         diagnostics
             .into_iter()
             .map(|diagnostic| {
-                let path = PathBuf::from(&diagnostic.span.file_name);
+                let file_name = &diagnostic.span.file_name;
+                let path = if let Some(manifest_path) = &manifest_path {
+                    manifest_path.parent().unwrap().join(file_name)
+                } else {
+                    PathBuf::from(file_name)
+                };
                 (path, diagnostic)
             })
             .collect::<multimap::MultiMap<_, _>>(),
